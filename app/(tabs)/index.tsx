@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { SystemCard } from '@/components/SystemCard';
+import { SystemButton } from '@/components/SystemButton';
 import { ProgressBar } from '@/components/ProgressBar';
 import { COLORS, SPACING, FONTS } from '@/constants/theme';
 import { XP_FORMULA } from '@/lib/game-logic';
-import { Zap, TrendingUp, Target, Award } from 'lucide-react-native';
+import { generateQuestsForHunter } from '@/services/systemController';
+import { Zap, TrendingUp, Target, Award, RefreshCw } from 'lucide-react-native';
 
 export default function DashboardScreen() {
   const { user } = useAuth();
@@ -15,6 +17,7 @@ export default function DashboardScreen() {
   const [activeQuests, setActiveQuests] = useState<any[]>([]);
   const [activeTitle, setActiveTitle] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const loadData = async () => {
     if (!user) return;
@@ -60,6 +63,25 @@ export default function DashboardScreen() {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
+  };
+
+  const handleGenerateQuests = async () => {
+    if (!user) return;
+
+    setGenerating(true);
+    try {
+      await generateQuestsForHunter(user.id);
+      await loadData();
+      Alert.alert(
+        'New Quests Generated',
+        'The System has assigned you new quests. Check your Quest Log to begin.',
+        [{ text: 'Continue', style: 'default' }]
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Failed to generate quests. Please try again.');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   if (!hunter) {
@@ -157,6 +179,21 @@ export default function DashboardScreen() {
             </View>
           </View>
         )}
+      </SystemCard>
+
+      <SystemCard style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <RefreshCw color={COLORS.system.glow} size={24} />
+          <Text style={styles.sectionTitle}>AI QUEST GENERATION</Text>
+        </View>
+        <Text style={styles.aiDescription}>
+          Let the System analyze your profile and generate personalized quests tailored to your goals and level.
+        </Text>
+        <SystemButton
+          title="GENERATE NEW QUESTS"
+          onPress={handleGenerateQuests}
+          loading={generating}
+        />
       </SystemCard>
 
       {activeQuests.length > 0 && (
@@ -295,6 +332,12 @@ const styles = StyleSheet.create({
     fontSize: FONTS.size.lg,
     fontWeight: FONTS.weight.bold,
     color: COLORS.text.primary,
+  },
+  aiDescription: {
+    fontSize: FONTS.size.sm,
+    color: COLORS.text.secondary,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
   },
   attributesGrid: {
     gap: SPACING.sm,

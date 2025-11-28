@@ -5,7 +5,10 @@ import { supabase } from '@/lib/supabase';
 import { SystemCard } from '@/components/SystemCard';
 import { SystemButton } from '@/components/SystemButton';
 import { COLORS, SPACING, FONTS } from '@/constants/theme';
-import { completeQuest } from '@/lib/game-logic';
+import { completeQuestWithSystem } from '@/services/systemController';
+import { LevelUpPanel } from '@/ui/systemPanels/LevelUpPanel';
+import { RankUpPanel } from '@/ui/systemPanels/RankUpPanel';
+import { QuestClearedPanel } from '@/ui/systemPanels/QuestClearedPanel';
 import { CheckCircle2, Flame, Crown, Swords, Plus } from 'lucide-react-native';
 
 export default function QuestsScreen() {
@@ -13,6 +16,11 @@ export default function QuestsScreen() {
   const [quests, setQuests] = useState<any[]>([]);
   const [selectedType, setSelectedType] = useState<'Daily' | 'Boss' | 'Raid' | 'Optional'>('Daily');
   const [loading, setLoading] = useState<string | null>(null);
+
+  const [showQuestCleared, setShowQuestCleared] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showRankUp, setShowRankUp] = useState(false);
+  const [completionData, setCompletionData] = useState<any>(null);
 
   const loadQuests = async () => {
     if (!user) return;
@@ -34,27 +42,56 @@ export default function QuestsScreen() {
   const handleCompleteQuest = async (questId: string) => {
     if (!user) return;
 
+    const currentQuest = quests.find(q => q.id === questId);
+    if (!currentQuest) return;
+
     setLoading(questId);
-    const result = await completeQuest(questId, user.id);
+    const result = await completeQuestWithSystem(questId, user.id);
 
     if (result.error) {
       Alert.alert('Error', result.error);
-    } else if (result.success) {
-      let message = `QUEST CLEARED!\n+${result.xpGained} XP`;
+      setLoading(null);
+      return;
+    }
 
-      if (result.leveledUp) {
-        message += `\n\nLEVEL UP! ${result.newLevel}`;
-      }
+    if (result.success) {
+      setCompletionData({
+        questTitle: currentQuest.title,
+        xpGained: result.xpGained,
+        comboBonus: result.comboBonus,
+        breakdown: [],
+        levelUp: result.levelUp,
+        rankUp: result.rankUp,
+      });
 
-      if (result.rankedUp) {
-        message += `\n\nRANK UP! ${result.newRank}-RANK`;
-      }
-
-      Alert.alert('Success', message);
+      setShowQuestCleared(true);
       await loadQuests();
     }
 
     setLoading(null);
+  };
+
+  const handleQuestClearedClose = () => {
+    setShowQuestCleared(false);
+
+    if (completionData?.levelUp) {
+      setTimeout(() => setShowLevelUp(true), 300);
+    } else if (completionData?.rankUp) {
+      setTimeout(() => setShowRankUp(true), 300);
+    }
+  };
+
+  const handleLevelUpClose = () => {
+    setShowLevelUp(false);
+
+    if (completionData?.rankUp) {
+      setTimeout(() => setShowRankUp(true), 300);
+    }
+  };
+
+  const handleRankUpClose = () => {
+    setShowRankUp(false);
+    setCompletionData(null);
   };
 
   const activeQuests = quests.filter(q => q.status === 'Active');
@@ -74,6 +111,39 @@ export default function QuestsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>QUEST LOG</Text>
       </View>
+
+      {completionData && (
+        <>
+          <QuestClearedPanel
+            visible={showQuestCleared}
+            questTitle={completionData.questTitle}
+            xpGained={completionData.xpGained}
+            comboBonus={completionData.comboBonus}
+            breakdown={completionData.breakdown}
+            onClose={handleQuestClearedClose}
+          />
+
+          {completionData.levelUp && (
+            <LevelUpPanel
+              visible={showLevelUp}
+              oldLevel={completionData.levelUp.oldLevel}
+              newLevel={completionData.levelUp.newLevel}
+              artwork={completionData.levelUp.artwork}
+              onClose={handleLevelUpClose}
+            />
+          )}
+
+          {completionData.rankUp && (
+            <RankUpPanel
+              visible={showRankUp}
+              oldRank={completionData.rankUp.oldRank}
+              newRank={completionData.rankUp.newRank}
+              artwork={completionData.rankUp.artwork}
+              onClose={handleRankUpClose}
+            />
+          )}
+        </>
+      )}
 
       <View style={styles.tabBar}>
         {(['Daily', 'Boss', 'Raid', 'Optional'] as const).map((type) => (

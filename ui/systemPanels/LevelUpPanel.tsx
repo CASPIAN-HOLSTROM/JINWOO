@@ -1,0 +1,211 @@
+import { Modal, View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { COLORS, SPACING, FONTS } from '@/constants/theme';
+import { SystemCard } from '@/components/SystemCard';
+import { Zap, TrendingUp } from 'lucide-react-native';
+
+interface LevelUpPanelProps {
+  visible: boolean;
+  oldLevel: number;
+  newLevel: number;
+  artwork: {
+    imagePath: string;
+    description: string;
+  };
+  onClose: () => void;
+}
+
+const { width } = Dimensions.get('window');
+
+export function LevelUpPanel({ visible, oldLevel, newLevel, artwork, onClose }: LevelUpPanelProps) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <SystemCard glowing style={styles.card}>
+            <View style={styles.header}>
+              <Zap color={COLORS.system.glow} size={32} />
+              <Text style={styles.title}>LEVEL UP!</Text>
+              <Zap color={COLORS.system.glow} size={32} />
+            </View>
+
+            <View style={styles.levelDisplay}>
+              <View style={styles.levelBox}>
+                <Text style={styles.levelLabel}>FROM</Text>
+                <Text style={styles.levelValue}>{oldLevel}</Text>
+              </View>
+
+              <TrendingUp color={COLORS.success} size={48} />
+
+              <View style={styles.levelBox}>
+                <Text style={styles.levelLabel}>TO</Text>
+                <Text style={[styles.levelValue, styles.newLevel]}>{newLevel}</Text>
+              </View>
+            </View>
+
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: `https://images.pexels.com/photos/1405849/pexels-photo-1405849.jpeg?auto=compress&cs=tinysrgb&w=800` }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+              <View style={styles.imageOverlay}>
+                <Text style={styles.imageText}>SUNG JIN-WOO</Text>
+                <Text style={styles.imageSubtext}>ASCENDING</Text>
+              </View>
+            </View>
+
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.description}>{artwork.description}</Text>
+            </View>
+
+            <View style={styles.glowLine} />
+
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeButtonText}>CONTINUE YOUR ASCENSION</Text>
+            </TouchableOpacity>
+          </SystemCard>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    width: width * 0.9,
+    maxWidth: 500,
+  },
+  card: {
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.xl,
+  },
+  title: {
+    fontSize: FONTS.size['3xl'],
+    fontWeight: FONTS.weight.bold,
+    color: COLORS.system.glow,
+    letterSpacing: 3,
+    textShadowColor: COLORS.system.glow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
+  },
+  levelDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: SPACING.xl,
+  },
+  levelBox: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: COLORS.background.elevated,
+    padding: SPACING.lg,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.system.blue,
+  },
+  levelLabel: {
+    fontSize: FONTS.size.sm,
+    color: COLORS.text.secondary,
+    fontWeight: FONTS.weight.semibold,
+    marginBottom: SPACING.xs,
+  },
+  levelValue: {
+    fontSize: FONTS.size['4xl'],
+    fontWeight: FONTS.weight.bold,
+    color: COLORS.text.primary,
+  },
+  newLevel: {
+    color: COLORS.system.glow,
+    textShadowColor: COLORS.system.glow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 250,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: SPACING.lg,
+    borderWidth: 2,
+    borderColor: COLORS.system.glow,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageText: {
+    fontSize: FONTS.size['2xl'],
+    fontWeight: FONTS.weight.bold,
+    color: COLORS.system.glow,
+    letterSpacing: 2,
+    textShadowColor: COLORS.system.glow,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
+  },
+  imageSubtext: {
+    fontSize: FONTS.size.base,
+    color: COLORS.text.primary,
+    marginTop: SPACING.xs,
+  },
+  descriptionContainer: {
+    backgroundColor: COLORS.background.elevated,
+    padding: SPACING.md,
+    borderRadius: 8,
+    marginBottom: SPACING.lg,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.system.glow,
+  },
+  description: {
+    fontSize: FONTS.size.base,
+    color: COLORS.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  glowLine: {
+    width: '100%',
+    height: 2,
+    backgroundColor: COLORS.system.glow,
+    marginBottom: SPACING.lg,
+    shadowColor: COLORS.system.glow,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+  },
+  closeButton: {
+    backgroundColor: COLORS.system.blue,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.system.glow,
+  },
+  closeButtonText: {
+    fontSize: FONTS.size.base,
+    fontWeight: FONTS.weight.bold,
+    color: COLORS.text.primary,
+    letterSpacing: 1,
+  },
+});
