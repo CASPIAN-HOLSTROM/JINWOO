@@ -6,6 +6,12 @@ import { checkRankUp } from './progression/rankSystem';
 import { checkTitleUnlocks } from './progression/titleUnlocker';
 import { getAscensionArtwork } from './artEngine/ascensionArt';
 import { getRankArtwork } from './artEngine/rankArt';
+import {
+  shouldShowLevelUpEffect,
+  shouldShowRankUpEffect,
+  decideUpgradePresentation,
+  getCompletionMessage,
+} from './progression/upgradeTimingLogic';
 
 export interface QuestCompletionResult {
   success: boolean;
@@ -103,7 +109,17 @@ export async function completeQuestWithSystem(
     totalXP: newTotalXP,
   };
 
-  if (levelResult.ascensionTriggered) {
+  const levelUpEvent = levelResult.ascensionTriggered
+    ? shouldShowLevelUpEffect(levelResult.oldLevel, levelResult.newLevel, levelResult.levelsGained)
+    : null;
+
+  const rankUpEvent = rankResult.rankedUp
+    ? shouldShowRankUpEffect(rankResult.oldRank, rankResult.newRank)
+    : null;
+
+  const upgradeDecision = decideUpgradePresentation(levelUpEvent, rankUpEvent, []);
+
+  if (levelResult.ascensionTriggered && upgradeDecision.showLevelUp) {
     const artwork = getAscensionArtwork(levelResult.newLevel);
     result.levelUp = {
       oldLevel: levelResult.oldLevel,
@@ -139,7 +155,7 @@ export async function completeQuestWithSystem(
     }
   }
 
-  if (rankResult.rankedUp) {
+  if (rankResult.rankedUp && upgradeDecision.showRankUp) {
     const artwork = getRankArtwork(rankResult.newRank);
     result.rankUp = {
       oldRank: rankResult.oldRank,

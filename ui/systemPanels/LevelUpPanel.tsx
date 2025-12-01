@@ -1,4 +1,5 @@
-import { Modal, View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { Modal, View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import { useEffect, useRef } from 'react';
 import { COLORS, SPACING, FONTS } from '@/constants/theme';
 import { SystemCard } from '@/components/SystemCard';
 import { Zap, TrendingUp } from 'lucide-react-native';
@@ -17,6 +18,60 @@ interface LevelUpPanelProps {
 const { width } = Dimensions.get('window');
 
 export function LevelUpPanel({ visible, oldLevel, newLevel, artwork, onClose }: LevelUpPanelProps) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnim, {
+              toValue: 1.1,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: 1000,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(glowAnim, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(glowAnim, {
+              toValue: 0,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+      ]).start();
+    } else {
+      scaleAnim.setValue(0.8);
+      pulseAnim.setValue(1);
+      glowAnim.setValue(0);
+    }
+  }, [visible]);
+
+  const glowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 1],
+  });
+
   return (
     <Modal
       visible={visible}
@@ -25,12 +80,16 @@ export function LevelUpPanel({ visible, oldLevel, newLevel, artwork, onClose }: 
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
           <SystemCard glowing style={styles.card}>
             <View style={styles.header}>
-              <Zap color={COLORS.system.glow} size={32} />
-              <Text style={styles.title}>LEVEL UP!</Text>
-              <Zap color={COLORS.system.glow} size={32} />
+              <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                <Zap color={COLORS.system.glow} size={32} fill={COLORS.system.glow} />
+              </Animated.View>
+              <Animated.Text style={[styles.title, { opacity: glowOpacity }]}>LEVEL UP!</Animated.Text>
+              <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                <Zap color={COLORS.system.glow} size={32} fill={COLORS.system.glow} />
+              </Animated.View>
             </View>
 
             <View style={styles.levelDisplay}>
@@ -47,17 +106,21 @@ export function LevelUpPanel({ visible, oldLevel, newLevel, artwork, onClose }: 
               </View>
             </View>
 
-            <View style={styles.imageContainer}>
+            <Animated.View style={[styles.imageContainer, { opacity: glowOpacity }]}>
               <Image
-                source={{ uri: `https://images.pexels.com/photos/1405849/pexels-photo-1405849.jpeg?auto=compress&cs=tinysrgb&w=800` }}
+                source={require('@/assets/images/THE REAWAKENED ONE copy.jpg')}
                 style={styles.image}
                 resizeMode="cover"
               />
               <View style={styles.imageOverlay}>
-                <Text style={styles.imageText}>SUNG JIN-WOO</Text>
+                <Animated.Text style={[styles.imageText, { transform: [{ scale: pulseAnim }] }]}>SUNG JIN-WOO</Animated.Text>
                 <Text style={styles.imageSubtext}>ASCENDING</Text>
+                <View style={styles.levelBadge}>
+                  <Text style={styles.levelBadgeText}>LV. {newLevel}</Text>
+                </View>
               </View>
-            </View>
+              <View style={styles.energyEffect} />
+            </Animated.View>
 
             <View style={styles.descriptionContainer}>
               <Text style={styles.description}>{artwork.description}</Text>
@@ -69,7 +132,7 @@ export function LevelUpPanel({ visible, oldLevel, newLevel, artwork, onClose }: 
               <Text style={styles.closeButtonText}>CONTINUE YOUR ASCENSION</Text>
             </TouchableOpacity>
           </SystemCard>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -152,9 +215,31 @@ const styles = StyleSheet.create({
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  energyEffect: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: COLORS.system.glow,
+    opacity: 0.1,
+  },
+  levelBadge: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    backgroundColor: COLORS.system.glow,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: COLORS.text.primary,
+  },
+  levelBadgeText: {
+    fontSize: FONTS.size.sm,
+    fontWeight: FONTS.weight.bold,
+    color: COLORS.background.primary,
+    letterSpacing: 1,
   },
   imageText: {
     fontSize: FONTS.size['2xl'],

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ImageBackground } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { SystemCard } from '@/components/SystemCard';
@@ -108,9 +108,17 @@ export default function QuestsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>QUEST LOG</Text>
-      </View>
+      <ImageBackground
+        source={require('@/assets/images/THE REAWAKENED ONE copy.jpg')}
+        style={styles.headerBg}
+        resizeMode="cover"
+        blurRadius={2}
+      >
+        <View style={styles.headerOverlay}>
+          <Text style={styles.title}>QUEST LOG</Text>
+          <Text style={styles.subtitle}>Choose your battles wisely, Hunter</Text>
+        </View>
+      </ImageBackground>
 
       {completionData && (
         <>
@@ -246,12 +254,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background.primary,
   },
-  header: {
+  headerBg: {
+    width: '100%',
     paddingTop: SPACING['2xl'],
+  },
+  headerOverlay: {
+    backgroundColor: 'rgba(10, 14, 26, 0.9)',
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.system.blue,
+    paddingVertical: SPACING.xl,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.system.glow,
+    alignItems: 'center',
+  },
+  subtitle: {
+    fontSize: FONTS.size.sm,
+    color: COLORS.text.secondary,
+    marginTop: SPACING.xs,
+    fontStyle: 'italic',
   },
   title: {
     fontSize: FONTS.size['3xl'],

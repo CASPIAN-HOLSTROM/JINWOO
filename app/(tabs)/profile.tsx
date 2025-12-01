@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -77,9 +77,17 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>HUNTER PROFILE</Text>
-      </View>
+      <ImageBackground
+        source={require('@/assets/images/THE REAWAKENED ONE copy.jpg')}
+        style={styles.headerBg}
+        resizeMode="cover"
+        blurRadius={1}
+      >
+        <View style={styles.headerOverlay}>
+          <Text style={styles.title}>HUNTER PROFILE</Text>
+          <Text style={styles.headerQuote}>Know thyself, and victory is assured</Text>
+        </View>
+      </ImageBackground>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         <SystemCard glowing style={styles.profileCard}>
@@ -226,12 +234,23 @@ const styles = StyleSheet.create({
     color: COLORS.system.glow,
     fontSize: FONTS.size.lg,
   },
-  header: {
+  headerBg: {
+    width: '100%',
     paddingTop: SPACING['2xl'],
+  },
+  headerOverlay: {
+    backgroundColor: 'rgba(10, 14, 26, 0.88)',
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
+    paddingVertical: SPACING.xl,
+    borderBottomWidth: 2,
     borderBottomColor: COLORS.system.blue,
+    alignItems: 'center',
+  },
+  headerQuote: {
+    fontSize: FONTS.size.xs,
+    color: COLORS.text.secondary,
+    marginTop: SPACING.xs,
+    fontStyle: 'italic',
   },
   title: {
     fontSize: FONTS.size['3xl'],

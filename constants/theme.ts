@@ -1,16 +1,16 @@
 export const COLORS = {
   background: {
     primary: '#0a0e1a',
-    secondary: '#111827',
+    secondary: '#0f1419',
     card: '#1a1f2e',
     elevated: '#1f2937',
   },
   system: {
-    blue: '#3b82f6',
-    cyan: '#06b6d4',
+    blue: '#4a9eff',
+    cyan: '#00d9ff',
     purple: '#8b5cf6',
-    accent: '#60a5fa',
-    glow: '#38bdf8',
+    accent: '#5eb3ff',
+    glow: '#00d9ff',
   },
   rank: {
     E: '#6b7280',
@@ -36,25 +36,25 @@ export const COLORS = {
 
 export const SHADOWS = {
   glow: {
-    shadowColor: COLORS.system.glow,
+    shadowColor: '#00d9ff',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
+    elevation: 12,
   },
   card: {
-    shadowColor: '#000',
+    shadowColor: '#4a9eff',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
   subtle: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 };
 

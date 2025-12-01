@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { SystemCard } from '@/components/SystemCard';
@@ -74,12 +74,20 @@ export default function TitlesScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>TITLES</Text>
-        <Text style={styles.subtitle}>
-          {unlockedTitles.length} / {unlockedTitles.length + lockedTitles.length} Unlocked
-        </Text>
-      </View>
+      <ImageBackground
+        source={require('@/assets/images/THE REAWAKENED ONE copy.jpg')}
+        style={styles.headerBg}
+        resizeMode="cover"
+        blurRadius={3}
+      >
+        <View style={styles.headerOverlay}>
+          <Text style={styles.title}>TITLES</Text>
+          <Text style={styles.subtitle}>
+            {unlockedTitles.length} / {unlockedTitles.length + lockedTitles.length} Unlocked
+          </Text>
+          <Text style={styles.headerQuote}>Collect the achievements of legends</Text>
+        </View>
+      </ImageBackground>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         {unlockedTitles.length > 0 && (
@@ -178,13 +186,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background.primary,
   },
-  header: {
+  headerBg: {
+    width: '100%',
     paddingTop: SPACING['2xl'],
+  },
+  headerOverlay: {
+    backgroundColor: 'rgba(10, 14, 26, 0.9)',
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.system.blue,
+    paddingVertical: SPACING.xl,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.rank.SSS,
     alignItems: 'center',
+  },
+  headerQuote: {
+    fontSize: FONTS.size.xs,
+    color: COLORS.text.dim,
+    marginTop: SPACING.xs,
+    fontStyle: 'italic',
   },
   title: {
     fontSize: FONTS.size['3xl'],

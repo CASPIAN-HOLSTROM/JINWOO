@@ -1,4 +1,5 @@
-import { Modal, View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { Modal, View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import { useEffect, useRef } from 'react';
 import { COLORS, SPACING, FONTS } from '@/constants/theme';
 import { SystemCard } from '@/components/SystemCard';
 import { Crown, ArrowUp } from 'lucide-react-native';
@@ -20,6 +21,65 @@ const { width } = Dimensions.get('window');
 export function RankUpPanel({ visible, oldRank, newRank, artwork, onClose }: RankUpPanelProps) {
   const rankColor = COLORS.rank[newRank as keyof typeof COLORS.rank] || COLORS.system.glow;
 
+  const explodeAnim = useRef(new Animated.Value(0)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 40,
+          friction: 6,
+          useNativeDriver: true,
+        }),
+        Animated.timing(explodeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.loop(
+          Animated.timing(rotateAnim, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          })
+        ),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(glowAnim, {
+              toValue: 1,
+              duration: 1200,
+              useNativeDriver: true,
+            }),
+            Animated.timing(glowAnim, {
+              toValue: 0,
+              duration: 1200,
+              useNativeDriver: true,
+            }),
+          ])
+        ),
+      ]).start();
+    } else {
+      explodeAnim.setValue(0);
+      rotateAnim.setValue(0);
+      scaleAnim.setValue(0.5);
+      glowAnim.setValue(0);
+    }
+  }, [visible]);
+
+  const rotation = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const glowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+
   return (
     <Modal
       visible={visible}
@@ -28,12 +88,16 @@ export function RankUpPanel({ visible, oldRank, newRank, artwork, onClose }: Ran
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
           <SystemCard glowing style={styles.card}>
             <View style={styles.header}>
-              <Crown color={rankColor} size={40} />
-              <Text style={[styles.title, { color: rankColor }]}>RANK PROMOTION</Text>
-              <Crown color={rankColor} size={40} />
+              <Animated.View style={{ transform: [{ rotate: rotation }] }}>
+                <Crown color={rankColor} size={40} />
+              </Animated.View>
+              <Animated.Text style={[styles.title, { color: rankColor, opacity: glowOpacity }]}>RANK PROMOTION</Animated.Text>
+              <Animated.View style={{ transform: [{ rotate: rotation }] }}>
+                <Crown color={rankColor} size={40} />
+              </Animated.View>
             </View>
 
             <View style={styles.rankDisplay}>
@@ -63,17 +127,18 @@ export function RankUpPanel({ visible, oldRank, newRank, artwork, onClose }: Ran
               </View>
             </View>
 
-            <View style={[styles.imageContainer, { borderColor: rankColor }]}>
+            <Animated.View style={[styles.imageContainer, { borderColor: rankColor, opacity: glowOpacity }]}>
               <Image
-                source={{ uri: `https://images.pexels.com/photos/1405849/pexels-photo-1405849.jpeg?auto=compress&cs=tinysrgb&w=800` }}
+                source={require('@/assets/images/THE REAWAKENED ONE copy.jpg')}
                 style={styles.image}
                 resizeMode="cover"
               />
               <View style={styles.imageOverlay}>
-                <Text style={[styles.imageTitle, { color: rankColor }]}>{artwork.title}</Text>
+                <Animated.Text style={[styles.imageTitle, { color: rankColor, transform: [{ scale: explodeAnim }] }]}>{artwork.title}</Animated.Text>
                 <Text style={styles.imageSubtext}>SUNG JIN-WOO</Text>
               </View>
-            </View>
+              <Animated.View style={[styles.rankEnergyEffect, { backgroundColor: rankColor, opacity: explodeAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.1] }) }]} />
+            </Animated.View>
 
             <View style={[styles.descriptionContainer, { borderLeftColor: rankColor }]}>
               <Text style={styles.description}>{artwork.description}</Text>
@@ -102,7 +167,7 @@ export function RankUpPanel({ visible, oldRank, newRank, artwork, onClose }: Ran
               <Text style={styles.closeButtonText}>EMBRACE YOUR NEW POWER</Text>
             </TouchableOpacity>
           </SystemCard>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -181,9 +246,12 @@ const styles = StyleSheet.create({
   },
   imageOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  rankEnergyEffect: {
+    ...StyleSheet.absoluteFillObject,
   },
   imageTitle: {
     fontSize: FONTS.size['3xl'],

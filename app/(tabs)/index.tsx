@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert, ImageBackground } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { SystemCard } from '@/components/SystemCard';
@@ -104,11 +104,19 @@ export default function DashboardScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.system.glow} />
       }
     >
-      <View style={styles.header}>
-        <Text style={styles.systemTitle}>THE SYSTEM</Text>
-        <Text style={styles.username}>{hunter.username}</Text>
-        <Text style={styles.title}>{activeTitle}</Text>
-      </View>
+      <ImageBackground
+        source={require('@/assets/images/THE REAWAKENED ONE copy.jpg')}
+        style={styles.headerBg}
+        resizeMode="cover"
+      >
+        <View style={styles.headerOverlay}>
+          <View style={styles.header}>
+            <Text style={styles.systemTitle}>THE SYSTEM</Text>
+            <Text style={styles.username}>{hunter.username}</Text>
+            <Text style={styles.title}>{activeTitle}</Text>
+          </View>
+        </View>
+      </ImageBackground>
 
       <SystemCard glowing style={styles.mainCard}>
         <View style={styles.levelRow}>
@@ -245,9 +253,19 @@ const styles = StyleSheet.create({
     fontSize: FONTS.size.lg,
     fontWeight: FONTS.weight.semibold,
   },
+  headerBg: {
+    width: '100%',
+    height: 200,
+    marginBottom: SPACING.xl,
+  },
+  headerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(10, 14, 26, 0.85)',
+    justifyContent: 'center',
+  },
   header: {
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    paddingVertical: SPACING.lg,
   },
   systemTitle: {
     fontSize: FONTS.size.lg,
